@@ -11,6 +11,17 @@
     <h1>Iniciando Projeto</h1>
     <div id="componente-react"></div>
     <script type="text/babel">
+      const Input = React.createClass({
+        render : function () {
+          return <input {...this.props}/>
+        }
+      });
+
+      const debug = function (e) {
+        console.log(e.target.value);
+      }
+
+      ReactDOM.render(<Input type="text" onChange={debug}/>, document.getElementById('componente-react'));
     </script>
   </body>
 </html>
