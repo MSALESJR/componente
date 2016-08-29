@@ -13,15 +13,223 @@
     <script type="text/babel">
       const Input = React.createClass({
         render : function () {
-          return <input {...this.props}/>
+          return (
+                  <div>
+                    <label>{this.props.label}</label>
+                    <input {...this.props}/>
+                  </div>
+          );
         }
       });
-
+      const Select  = React.createClass({
+        getOptions : function(){
+            let options_array = [];
+            let index = 0;
+            let options = this.props.options;
+            for(var key in options){
+                options_array.push(<option key={index} value={key}>{options[key]}</option>);
+                index++;
+            }
+            return options_array;
+        },
+        render : function () {
+          return (
+                  <div>
+                    <label>{this.props.label}</label>
+                    <select {...this.props}>
+                      {this.getOptions()}
+                    </select>
+                  </div>
+          )
+        }
+      });
+      const Checkbox = React.createClass({
+        render : function () {
+            return (<div>
+                      <input type="checkbox" {...this.props}/>
+                      <label>{this.props.label}</label>
+                    </div>)
+        }
+      });
       const debug = function (e) {
-        console.log(e.target.value);
+        console.log(e.target.type);
       }
 
-      ReactDOM.render(<Input type="text" onChange={debug}/>, document.getElementById('componente-react'));
+
+       const Form = React.createClass({
+            getInitialState: function(){
+              return {item:[]};
+            },
+            componentDidMount: function () {
+                if(this.props.item){
+                  this.setState({item:this.props.item});
+                }else{
+                  let item = {};
+                  this.props.fieldset.map(function(field){
+                      let property  = field[1]; //name, required, type
+                      let name      = property['name'];
+                      item[name]="";
+                  });
+                  this.setState({item:item});
+                }
+            },
+            onChange : function(field){
+                let name  = field.target.name;
+                let value = field.target.value;
+                let checked = field.target.checked;
+                let item  = this.state.item;
+                item[name] = value;
+                if(field.target.type == 'checkbox'){
+                    item[name] = checked;
+                }
+                this.setState({item:item});
+                console.log(item);
+            },
+            getFields : function () {
+                let fields = this.props.fieldset.map(function(field, index){
+                  let label     = field[0];
+                  let property  = field[1]; //name, required, type
+                  let name      = property['name'];
+                  let type      = property['type'];
+                  let value     = this.state.item[name];
+                  if(type == 'text'){
+                      if(property['required']){
+                          return (<Input onChange={this.onChange} key={index} label={label} name={name} value={value} required/>);
+                      }else{
+                          return (<Input onChange={this.onChange} key={index} label={label} name={name} value={value} />);
+                      }
+                  }
+                  if(type == 'checkbox'){
+                    return (<Checkbox onChange={this.onChange} key={index} label={label} name={name} defaultChecked={value} />);
+                  }
+                  if(type == 'select'){
+                      let options = field[2];
+                      return <Select onChange={this.onChange} key={index} options={options} name={name} label={label} defaultValue={value}/>
+                  }
+                },this);
+              return fields;
+            },
+            handleOnSubmit:function (e) {
+              e.preventDefault();
+              console.log("Dados do Formulario");
+              console.log(this.state.item);
+              console.log("-------------------");
+              return false;
+            },
+            render : function () {
+              return (
+                      <form onSubmit={this.handleOnSubmit} method="post">
+                        {this.getFields()}
+                        <input type="submit" value="Adicionar"/>
+                      </form>
+              );
+            }
+       });
+      const fieldset = [
+        [
+          "Descrição*",
+          {
+            "type": "text",
+            "name": "descricao",
+            "required": "required"
+          }
+        ],
+        [
+          "Tipo*",
+          {
+            "type": "select",
+            "name": "tipo",
+            "required": "required"
+          },
+          {
+            "C": "Caracteres",
+            "I": "Números Inteiros",
+            "N": "Números Inteiros e de Ponto Flutuante",
+            "D": "Data",
+            "B": "Condicional (Sim/Não)",
+            "ID": "Intervalo de Datas",
+            "IN": "Intervalo de Números",
+            "CC": "CPF/CNPJ",
+            "IM": "Imagem Associada",
+            "S": "Combo"
+          }
+        ],
+        [
+          "Tamanho*",
+          {
+            "type": "text",
+            "name": "tamanho"
+          }
+        ],
+        [
+          "Ordem*",
+          {
+            "type": "text",
+            "name": "ordem"
+          }
+        ],
+        [
+          "Tipo Busca Padrão",
+          {
+            "type": "select",
+            "name": "tipo_busca_padrao"
+          },
+          {
+            "1": "Igual a",
+            "2": "Começa com",
+            "3": "Contém",
+            "4": "Termina com",
+            "5": "Maior que",
+            "6": "Menor que",
+            "7": "No intervalo",
+            "8": "Múltiplos valores"
+          }
+        ],
+        [
+          "Mostrar Copiar?",
+          {
+            "type": "checkbox",
+            "name": "mostrar_copiar"
+          }
+        ],
+        [
+          "Permitir Busca por Conteúdo?",
+          {
+            "type": "checkbox",
+            "name": "permitir_busca_conteudo"
+          }
+        ],
+        [
+          "Exibir no cadastramento de documento?",
+          {
+            "type": "checkbox",
+            "name": "exibir_cadastramento"
+          }
+        ]
+      ];
+      const item = {
+        descricao : "descricao default",
+        exibir_cadastramento : false,
+        mostrar_copiar: false,
+        ordem: "ordem default",
+        permitir_busca_conteudo: true,
+        tamanho: "tamanho default",
+        tipo : 'B',
+        tipo_busca_padrao:3
+      };
+
+      ReactDOM.render(<Form fieldset={fieldset} item={item} onChange={debug}/>, document.getElementById('componente-react'));
     </script>
+
+
+
+
+
+
+
+
+
+
+
   </body>
 </html>
