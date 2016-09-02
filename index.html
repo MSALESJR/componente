@@ -111,9 +111,7 @@
             },
             handleOnSubmit:function (e) {
               e.preventDefault();
-              console.log("Dados do Formulario");
               console.log(this.state.item);
-              console.log("-------------------");
               return false;
             },
             render : function () {
@@ -218,7 +216,7 @@
         tipo_busca_padrao:3
       };
 
-      ReactDOM.render(<Form fieldset={fieldset} item={item} onChange={debug}/>, document.getElementById('componente-react'));
+      ReactDOM.render(<Form fieldset={fieldset} />, document.getElementById('componente-react'));
     </script>
 
 
